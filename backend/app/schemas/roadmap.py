@@ -56,7 +56,7 @@ class ResourceOut(BaseModel):
 class SkillNodeOut(BaseModel):
     id: int
     skill_name: str
-    mastery_level: str
+    mastery_level: Literal["DONE", "LACK"]
     category: str | None
     description: str | None
     estimated_hours: int | None
@@ -77,5 +77,16 @@ class RoadmapOut(BaseModel):
     error_message: str | None
     created_at: datetime
     skill_nodes: list[SkillNodeOut]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProofUploadOut(BaseModel):
+    id: int
+    skill_node_id: int
+    filename: str | None
+    filepath: str | None
+    uploaded_at: datetime
+    notes: str | None
 
     model_config = ConfigDict(from_attributes=True)

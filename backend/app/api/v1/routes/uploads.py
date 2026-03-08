@@ -1,5 +1,8 @@
+import logging
 import os
 import uuid
+
+_log = logging.getLogger(__name__)
 
 import aiofiles
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
@@ -73,8 +76,12 @@ def delete_upload(upload_id: int, db: Session = Depends(get_db)):
     if record.filepath and os.path.exists(record.filepath):
         try:
             os.remove(record.filepath)
-        except OSError:
-            pass
+        except OSError as exc:
+            _log.warning("Could not delete file %s: %s", record.filepath, exc)
+            raise HTTPException(
+                status_code=500,
+                detail=f"File removal failed: {exc}",
+            )
 
     db.delete(record)
     db.commit()
