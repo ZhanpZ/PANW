@@ -2,6 +2,10 @@
 
 [DESIGN.md](./DESIGN.md)
 
+# Synthetic Dataset
+
+[Datasets](https://github.com/ZhanpZ/PANW/tree/main/backend/fixtures)
+
 # Skill-Bridge Career Navigator
 
 **Candidate Name:** Zhanping Zeng
