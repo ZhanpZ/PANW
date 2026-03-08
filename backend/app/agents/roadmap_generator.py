@@ -95,23 +95,22 @@ You are given a skill gap analysis for a candidate targeting a {job_title} role.
 Gap Analysis:
 {gap_json}
 
-Create a learning roadmap as a list of skill nodes. Include ALL skills from the gap
-analysis (both DONE and LACK). For each node:
+Create a learning roadmap. Include ONLY the LACK skills (skills the candidate is missing).
+Limit to the 10 most important LACK skills. For each node:
 
-1. mastery_level: copy exactly from the gap analysis ("DONE" or "LACK" only)
-2. parent_skill: the name of the prerequisite skill node (must match another node's
-   skill_name exactly), or null if it is a foundational skill
-3. resources: provide at least 1 free AND at least 1 paid resource per node.
-   Use real, well-known resources:
-   - Free: YouTube, freeCodeCamp, official docs, MIT OpenCourseWare, roadmap.sh
-   - Paid: Udemy, Coursera, Pluralsight, Linux Foundation, A Cloud Guru
-4. estimated_hours: realistic hours to reach job-ready proficiency
-5. description: what the skill covers and why it matters for {job_title}
+1. mastery_level: always "LACK"
+2. parent_skill: prerequisite skill name (must match another node's skill_name exactly), or null
+3. resources: exactly 1 free AND exactly 1 paid resource per node.
+   - Free: official docs, freeCodeCamp, roadmap.sh, YouTube
+   - Paid: Udemy, Coursera, Pluralsight
+4. estimated_hours: integer, realistic hours to reach proficiency
+5. description: one sentence describing what the skill covers
 
 IMPORTANT:
-- parent_skill values MUST exactly match a skill_name from another node in the list
-- mastery_level must be "DONE" or "LACK" only
-- Every node must have >= 1 free resource and >= 1 paid resource
+- Output at most 10 nodes total
+- parent_skill must exactly match a skill_name in your list, or be null
+- mastery_level must be "LACK" only
+- Every node must have exactly 1 free and 1 paid resource
 
 Return ONLY a single valid JSON object — no markdown fences, no explanation.
 Use this exact shape:
