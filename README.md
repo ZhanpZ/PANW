@@ -6,6 +6,14 @@
 
 [Datasets](https://github.com/ZhanpZ/PANW/tree/main/backend/fixtures)
 
+# Link to Video
+
+[Demo](https://www.youtube.com/watch?v=4j6b8pJpwLI)
+
+# Example
+
+[Screenshot](https://github.com/ZhanpZ/PANW/blob/main/ScreenShot_2026-03-08_194901_077.png?raw=true)
+
 # Skill-Bridge Career Navigator
 
 **Candidate Name:** Zhanping Zeng
