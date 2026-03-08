@@ -1,0 +1,3 @@
+{
+  "github_summaries": "Repository: movie-recommender\nDescription: Collaborative filtering movie recommendation engine\nTech: Python, pandas, scikit-learn, Flask\n• Implemented user-based and item-based collaborative filtering algorithms\n• REST API serving recommendations as JSON with Flask\n• Achieved 78% hit rate on MovieLens 1M dataset\n\nRepository: campus-scheduler\nDescription: University event management web application\nTech: Python, Django, SQLite, Bootstrap\n• User authentication, role-based access (admin/student)\n• CRUD operations for events with calendar view\n• Deployed locally with Django development server"
+}

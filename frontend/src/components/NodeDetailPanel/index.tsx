@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
 import { useUiStore } from "../../store/uiStore";
 import { useRoadmapStore } from "../../store/roadmapStore";
-import type { MasteryLevel, ProofUpload as ProofUploadType } from "../../types";
+import type { MasteryLevel } from "../../types";
 import { MASTERY_COLORS } from "../RoadmapCanvas/nodeUtils";
 import { ResourceList } from "./ResourceList";
-import { ProofUpload } from "./ProofUpload";
 
 export function NodeDetailPanel() {
   const { selectedNodeId, isPanelOpen, setIsPanelOpen } = useUiStore();
@@ -12,18 +10,12 @@ export function NodeDetailPanel() {
   const { addToast } = useUiStore();
 
   const node = roadmap?.skill_nodes.find((n) => n.id === selectedNodeId);
-  const [localUploads, setLocalUploads] = useState<ProofUploadType[]>([]);
 
-  useEffect(() => {
-    if (node) setLocalUploads(node.proof_uploads ?? []);
-  }, [node]);
-
-  const handleMasteryToggle = async () => {
+  const handleMarkDone = async () => {
     if (!node) return;
-    const next: MasteryLevel = node.mastery_level === "DONE" ? "LACK" : "DONE";
     try {
-      await updateNodeMastery(node.id, next);
-      addToast(`Mastery updated to ${next}.`, "success");
+      await updateNodeMastery(node.id, "DONE");
+      addToast(`${node.skill_name} marked as DONE.`, "success");
     } catch {
       addToast("Failed to update mastery.", "error");
     }
@@ -107,16 +99,24 @@ export function NodeDetailPanel() {
             </div>
           )}
 
-          {/* Toggle mastery */}
-          <button
-            onClick={handleMasteryToggle}
-            className={`w-full py-2 rounded-lg text-sm font-medium transition-colors border-2
-              ${mastery === "DONE"
-                ? "border-red-300 text-red-600 hover:bg-red-50"
-                : "border-green-400 text-green-700 hover:bg-green-50"}`}
-          >
-            {mastery === "DONE" ? "Mark as LACK" : "Mark as DONE"}
-          </button>
+          {/* Mark as Done — only shown for LACK nodes */}
+          {mastery === "LACK" && (
+            <button
+              onClick={handleMarkDone}
+              className="w-full py-2 rounded-lg text-sm font-medium transition-colors border-2
+                border-green-400 text-green-700 hover:bg-green-50"
+            >
+              Mark as DONE
+            </button>
+          )}
+
+          {/* Completion badge for DONE nodes */}
+          {mastery === "DONE" && (
+            <div className="w-full py-2 rounded-lg text-sm font-medium text-center
+              border-2 border-green-400 bg-green-50 text-green-700">
+              Completed
+            </div>
+          )}
 
           {/* Resources */}
           <div>
@@ -124,19 +124,6 @@ export function NodeDetailPanel() {
               Learning Resources
             </p>
             <ResourceList resources={node.resources} />
-          </div>
-
-          {/* Proof uploads */}
-          <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Proof of Work
-            </p>
-            <ProofUpload
-              nodeId={node.id}
-              uploads={localUploads}
-              onUploaded={(u) => setLocalUploads((prev) => [...prev, u])}
-              onDeleted={(id) => setLocalUploads((prev) => prev.filter((u) => u.id !== id))}
-            />
           </div>
         </div>
       </div>

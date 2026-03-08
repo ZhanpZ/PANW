@@ -1,0 +1,3 @@
+{
+  "github_summaries": "Repository: todo-api\nDescription: RESTful todo API with authentication\nTech: Node.js, Express, MongoDB, JWT\n• CRUD endpoints for tasks with user authentication\n• JWT-based auth with bcrypt password hashing\n• Deployed to Heroku with MongoDB Atlas cloud DB\n\nRepository: blog-platform\nDescription: Full-stack blog application\nTech: React, Node.js, Express, MongoDB\n• User registration and login (JWT)\n• Rich text post creation and commenting system\n• Basic CI with GitHub Actions"
+}

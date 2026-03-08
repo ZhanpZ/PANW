@@ -32,4 +32,5 @@ def get_llm() -> LLM:
         model="gpt-4o-mini",
         api_key=settings.OPENAI_API_KEY,
         temperature=0.1,
+        max_tokens=4096,
     )

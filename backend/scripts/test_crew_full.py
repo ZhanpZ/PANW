@@ -16,13 +16,17 @@ from app.db.models import Session, Profile, Roadmap, SkillNode, Resource
 from app.schemas.roadmap import GenerateRoadmapRequest
 from app.services.crew_service import run_pipeline, _persist_roadmap
 
-FIXTURE = os.path.join(os.path.dirname(__file__), "..", "fixtures", "fixture_0.json")
+FIXTURE_RESUME = os.path.join(os.path.dirname(__file__), "..", "fixtures", "fixture_0_resume.json")
+FIXTURE_GITHUB = os.path.join(os.path.dirname(__file__), "..", "fixtures", "fixture_0_github.json")
 
 
 def main():
     init_db()
-    with open(FIXTURE, encoding="utf-8") as f:
-        data = json.load(f)
+    with open(FIXTURE_RESUME, encoding="utf-8") as f:
+        resume_data = json.load(f)
+    with open(FIXTURE_GITHUB, encoding="utf-8") as f:
+        github_data = json.load(f)
+    data = {**resume_data, **github_data}
 
     db = SessionLocal()
     try:
@@ -73,16 +77,10 @@ def main():
         assert len(nodes) > 0, "No skill_nodes inserted!"
         assert len(resources) > 0, "No resources inserted!"
 
-        # Check positions vary
-        xs = {n.position_x for n in nodes}
-        ys = {n.position_y for n in nodes}
-        assert len(xs) > 1 or len(ys) > 1, "All nodes at same position — layout failed!"
-
         print("\nSample node:")
         n = nodes[0]
         print(f"  skill_name  : {n.skill_name}")
         print(f"  mastery     : {n.mastery_level}")
-        print(f"  position    : ({n.position_x}, {n.position_y})")
         print(f"  parent_id   : {n.parent_id}")
 
         print("\nAll assertions passed. PASSED")

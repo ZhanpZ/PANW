@@ -3,7 +3,6 @@ import type {
   GenerateRoadmapRequest,
   JobStatus,
   MasteryLevel,
-  ProofUpload,
   Roadmap,
   Session,
 } from "../types";
@@ -37,20 +36,6 @@ export const roadmapApi = {
   get: (roadmapId: number) => api.get<Roadmap>(`/api/v1/roadmap/${roadmapId}`),
   updateNodeMastery: (nodeId: number, mastery_level: MasteryLevel) =>
     api.patch(`/api/v1/roadmap/node/${nodeId}`, { mastery_level }),
-};
-
-// ── Uploads ───────────────────────────────────────────────────────────────────
-
-export const uploadApi = {
-  upload: (nodeId: number, file: File, notes?: string) => {
-    const form = new FormData();
-    form.append("file", file);
-    if (notes) form.append("notes", notes);
-    return api.post<ProofUpload>(`/api/v1/uploads/${nodeId}`, form);
-  },
-  list: (nodeId: number) =>
-    api.get<ProofUpload[]>(`/api/v1/uploads/${nodeId}`),
-  delete: (uploadId: number) => api.delete(`/api/v1/uploads/${uploadId}`),
 };
 
 // ── Global error interceptor ──────────────────────────────────────────────────

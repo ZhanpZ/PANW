@@ -115,7 +115,6 @@ class SkillNode(Base):
         backref=backref("parent", remote_side="SkillNode.id"),
     )
     resources = relationship("Resource", back_populates="skill_node", cascade="all, delete-orphan")
-    proof_uploads = relationship("ProofUpload", back_populates="skill_node", cascade="all, delete-orphan")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -134,19 +133,3 @@ class Resource(Base):
 
     skill_node = relationship("SkillNode", back_populates="resources")
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ProofUpload
-# ──────────────────────────────────────────────────────────────────────────────
-
-class ProofUpload(Base):
-    __tablename__ = "proof_uploads"
-
-    id = Column(Integer, primary_key=True, index=True)
-    skill_node_id = Column(Integer, ForeignKey("skill_nodes.id"), nullable=False)
-    filename = Column(String, nullable=True)
-    filepath = Column(String, nullable=True)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
-    notes = Column(Text, nullable=True)
-
-    skill_node = relationship("SkillNode", back_populates="proof_uploads")

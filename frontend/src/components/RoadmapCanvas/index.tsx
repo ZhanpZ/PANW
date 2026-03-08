@@ -39,12 +39,13 @@ export function RoadmapCanvas() {
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
       fitView
-      fitViewOptions={{ padding: 0.2 }}
-      minZoom={0.2}
+      fitViewOptions={{ padding: 0.15 }}
+      minZoom={0.1}
       maxZoom={2}
+      proOptions={{ hideAttribution: true }}
     >
       <Background color="#e2e8f0" gap={20} />
-      <Controls />
+      <Controls showInteractive={false} />
       <MiniMap
         nodeColor={(node: Node) => {
           const mastery = (node.data?.mastery_level as MasteryLevel) ?? "LACK";
@@ -52,6 +53,7 @@ export function RoadmapCanvas() {
         }}
         maskColor="rgba(0,0,0,0.08)"
         style={{ border: "1px solid #e2e8f0" }}
+        className="hidden sm:block"
       />
     </ReactFlow>
   );

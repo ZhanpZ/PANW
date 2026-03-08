@@ -1,0 +1,3 @@
+{
+  "github_summaries": "Repository: portfolio-site\nDescription: Personal portfolio built with React + Vite + Tailwind\nTech: React, TypeScript, Tailwind CSS, Vite\n• Responsive layout with mobile-first design\n• Dark/light mode toggle using CSS variables\n• Deployed on Vercel with automatic preview deployments\n\nRepository: component-lib\nDescription: Internal UI component library\nTech: React, TypeScript, Storybook\n• 30+ reusable components (Button, Modal, Table, Form inputs)\n• Accessibility-first (ARIA, keyboard navigation)\n• Jest + RTL unit tests for all components"
+}

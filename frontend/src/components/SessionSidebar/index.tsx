@@ -4,7 +4,7 @@ import { useSessionStore } from "../../store/sessionStore";
 import { useRoadmapStore } from "../../store/roadmapStore";
 import { useUiStore } from "../../store/uiStore";
 
-export function SessionSidebar() {
+export function SessionSidebar({ onClose }: { onClose?: () => void }) {
   const { sessions, activeSessionId, loading, loadSessions, createSession, deleteSession, setActiveSessionId } =
     useSessionStore();
   const { clearRoadmap } = useRoadmapStore();
@@ -36,6 +36,7 @@ export function SessionSidebar() {
     setActiveSessionId(id);
     clearRoadmap();
     navigate("/");
+    onClose?.();
   };
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
@@ -51,10 +52,21 @@ export function SessionSidebar() {
 
   return (
     <aside className="w-56 flex-shrink-0 bg-gray-900 text-gray-100 flex flex-col h-full">
-      <div className="px-4 py-4 border-b border-gray-700">
+      <div className="px-4 py-4 border-b border-gray-700 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
           Sessions
         </h2>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-200 transition-colors p-0.5"
+            aria-label="Close menu"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Session list */}

@@ -1,0 +1,3 @@
+{
+  "github_summaries": "Repository: sales-etl\nDescription: Automated ETL pipeline for sales trend analysis\nTech: Python, pandas, MySQL, openpyxl\n• Extracts data from MySQL via SQLAlchemy connection\n• Applies cleaning and aggregation transformations with pandas\n• Outputs formatted Excel reports on a weekly schedule\n\nRepository: churn-analysis\nDescription: Statistical churn analysis and visualization\nTech: R, ggplot2, dplyr\n• Logistic regression model predicting customer churn (AUC 0.81)\n• Visual reports generated with R Markdown"
+}

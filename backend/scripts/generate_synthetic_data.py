@@ -4,8 +4,9 @@ Generate synthetic resume + GitHub summary fixtures for testing.
 Usage:
     python scripts/generate_synthetic_data.py --count 5 --output fixtures/
 
-Each output file: fixtures/fixture_N.json
-Shape: { "resume_text": str, "github_summaries": str, "job_title": str }
+Outputs per profile:
+  fixtures/fixture_N_resume.json  →  { "resume_text": str, "job_title": str }
+  fixtures/fixture_N_github.json  →  { "github_summaries": str }
 """
 
 import argparse
@@ -99,11 +100,10 @@ Tech: Python, Django, SQLite, Bootstrap
 • CRUD operations for events with calendar view
 • Deployed locally with Django development server
 """
-    return {
-        "resume_text": resume.strip(),
-        "github_summaries": github.strip(),
-        "job_title": "Cloud Engineer",
-    }
+    return (
+        {"resume_text": resume.strip(), "job_title": "Cloud Engineer"},
+        {"github_summaries": github.strip()},
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -156,11 +156,10 @@ Tech: R, ggplot2, dplyr
 • Logistic regression model predicting customer churn (AUC 0.81)
 • Visual reports generated with R Markdown
 """
-    return {
-        "resume_text": resume.strip(),
-        "github_summaries": github.strip(),
-        "job_title": "Data Engineer",
-    }
+    return (
+        {"resume_text": resume.strip(), "job_title": "Data Engineer"},
+        {"github_summaries": github.strip()},
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -215,11 +214,10 @@ Tech: React, TypeScript, Storybook
 • Accessibility-first (ARIA, keyboard navigation)
 • Jest + RTL unit tests for all components
 """
-    return {
-        "resume_text": resume.strip(),
-        "github_summaries": github.strip(),
-        "job_title": "Full Stack Engineer",
-    }
+    return (
+        {"resume_text": resume.strip(), "job_title": "Full Stack Engineer"},
+        {"github_summaries": github.strip()},
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -274,11 +272,10 @@ Tech: React, Node.js, Express, MongoDB
 • Rich text post creation and commenting system
 • Basic CI with GitHub Actions
 """
-    return {
-        "resume_text": resume.strip(),
-        "github_summaries": github.strip(),
-        "job_title": "Backend Engineer",
-    }
+    return (
+        {"resume_text": resume.strip(), "job_title": "Backend Engineer"},
+        {"github_summaries": github.strip()},
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -336,11 +333,10 @@ Tech: Python, scikit-learn, matplotlib, seaborn
 • PCA + t-SNE dimensionality reduction for visualization
 • Differential expression analysis comparing cluster centroids
 """
-    return {
-        "resume_text": resume.strip(),
-        "github_summaries": github.strip(),
-        "job_title": "ML Engineer",
-    }
+    return (
+        {"resume_text": resume.strip(), "job_title": "ML Engineer"},
+        {"github_summaries": github.strip()},
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -366,13 +362,20 @@ def main() -> None:
     os.makedirs(args.output, exist_ok=True)
 
     for i in range(count):
-        data = PROFILES[i]()
-        out_path = os.path.join(args.output, f"fixture_{i}.json")
-        with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        print(f"  [OK] {out_path}  ({data['job_title']})")
+        resume_data, github_data = PROFILES[i]()
 
-    print(f"\nGenerated {count} fixture(s) in '{args.output}'")
+        resume_path = os.path.join(args.output, f"fixture_{i}_resume.json")
+        github_path = os.path.join(args.output, f"fixture_{i}_github.json")
+
+        with open(resume_path, "w", encoding="utf-8") as f:
+            json.dump(resume_data, f, indent=2, ensure_ascii=False)
+        with open(github_path, "w", encoding="utf-8") as f:
+            json.dump(github_data, f, indent=2, ensure_ascii=False)
+
+        print(f"  [OK] {resume_path}  ({resume_data['job_title']})")
+        print(f"  [OK] {github_path}")
+
+    print(f"\nGenerated {count} fixture pair(s) in '{args.output}'")
 
 
 if __name__ == "__main__":

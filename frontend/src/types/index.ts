@@ -10,13 +10,6 @@ export interface Resource {
   platform: string | null;
 }
 
-export interface ProofUpload {
-  id: number;
-  filename: string | null;
-  uploaded_at: string;
-  notes: string | null;
-}
-
 export interface SkillNode {
   id: number;
   skill_name: string;
@@ -29,7 +22,6 @@ export interface SkillNode {
   parent_id: number | null;
   reasoning: string | null;
   resources: Resource[];
-  proof_uploads: ProofUpload[];
 }
 
 export interface Roadmap {

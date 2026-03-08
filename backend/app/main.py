@@ -10,7 +10,6 @@ from app.core.config import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure required directories exist
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     os.makedirs("data", exist_ok=True)
 
     # Initialize database tables
@@ -35,9 +34,8 @@ app.add_middleware(
 )
 
 # Routers (imported here to avoid circular imports at module level)
-from app.api.v1.routes import health, sessions, roadmap, uploads  # noqa: E402
+from app.api.v1.routes import health, sessions, roadmap  # noqa: E402
 
 app.include_router(health.router, prefix="/api/v1", tags=["health"])
 app.include_router(sessions.router, prefix="/api/v1", tags=["sessions"])
 app.include_router(roadmap.router, prefix="/api/v1", tags=["roadmap"])
-app.include_router(uploads.router, prefix="/api/v1", tags=["uploads"])

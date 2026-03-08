@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime  # kept for RoadmapOut.created_at
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -53,15 +53,6 @@ class ResourceOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ProofUploadOut(BaseModel):
-    id: int
-    filename: str | None
-    uploaded_at: datetime
-    notes: str | None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class SkillNodeOut(BaseModel):
     id: int
     skill_name: str
@@ -74,7 +65,6 @@ class SkillNodeOut(BaseModel):
     parent_id: int | None
     reasoning: str | None
     resources: list[ResourceOut]
-    proof_uploads: list[ProofUploadOut]
 
     model_config = ConfigDict(from_attributes=True)
 

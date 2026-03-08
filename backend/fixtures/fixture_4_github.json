@@ -1,0 +1,3 @@
+{
+  "github_summaries": "Repository: protein-binding-predictor\nDescription: ML model for drug-target binding affinity prediction\nTech: Python, XGBoost, scikit-learn, RDKit, pandas\n• Feature engineering from SMILES molecular strings using RDKit\n• XGBoost classifier with Bayesian hyperparameter tuning (Optuna)\n• Cross-validation achieving 0.89 AUC on held-out test set\n• Jupyter notebooks with full experiment tracking\n\nRepository: rna-seq-clustering\nDescription: Unsupervised clustering of gene expression data\nTech: Python, scikit-learn, matplotlib, seaborn\n• K-means and hierarchical agglomerative clustering on RNA-seq counts\n• PCA + t-SNE dimensionality reduction for visualization\n• Differential expression analysis comparing cluster centroids"
+}
