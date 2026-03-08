@@ -1,6 +1,6 @@
 # Design Document
 
-[https://github.com/ZhanpZ/PANW/blob/main/DESIGN.md]DESIGN.md
+[DESIGN.md](./DESIGN.md)
 
 # Skill-Bridge Career Navigator
 
