@@ -81,7 +81,7 @@ python scripts/test_crew_full.py
 
 ## Tradeoffs & Prioritization
 
-**What did you cut to stay within the 4–6 hour limit?**: I dropped several planned features to ensure the core functionality was working. These include: uploading proof of work, letting the agent decide on mastery level based on proof of work, adding spaced repetition, and having a confidence score percentage.
+**What did you cut to stay within the 4–6 hour limit?**: I dropped several planned features to ensure the core functionality was working within time constraint. These include: uploading proof of work, letting the agent decide on mastery level based on proof of work, adding spaced repetition, and having a confidence score percentage.
 
 **What would you build next if you had more time?**: I would work on the proof-of-work functionality and the features that depend on it.
 
