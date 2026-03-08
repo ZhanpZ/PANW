@@ -12,7 +12,7 @@
 
 # Example
 
-[Screenshot](https://github.com/ZhanpZ/PANW/blob/main/ScreenShot_2026-03-08_194901_077.png?raw=true)
+![Screenshot](https://github.com/ZhanpZ/PANW/blob/main/ScreenShot_2026-03-08_194901_077.png?raw=true)
 
 # Skill-Bridge Career Navigator
 
