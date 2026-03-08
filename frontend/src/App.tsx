@@ -1,11 +1,24 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { SessionSidebar } from "./components/SessionSidebar";
+import { NotificationToast } from "./components/NotificationToast";
+import { HomePage } from "./pages/HomePage";
+import { RoadmapPage } from "./pages/RoadmapPage";
+
 function App() {
   return (
-    <div className="flex items-center justify-center h-full bg-gray-50">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800">Skill-Bridge Career Navigator</h1>
-        <p className="text-gray-500 mt-2">Scaffold ready — implementation in progress.</p>
+    <BrowserRouter>
+      <div className="flex h-full bg-gray-50">
+        <SessionSidebar />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/roadmap" element={<RoadmapPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </div>
-    </div>
+      <NotificationToast />
+    </BrowserRouter>
   );
 }
 
