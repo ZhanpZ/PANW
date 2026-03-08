@@ -137,6 +137,23 @@ _RESOURCE_TEMPLATES: list[tuple[list[str], list[ResourceSpec], list[ResourceSpec
         ResourceSpec(title="CompTIA Security+ Study Guide — Udemy", url="https://www.udemy.com/course/comptia-security-sy0-601/", resource_type="paid", platform="Udemy"),
         ResourceSpec(title="Certified Ethical Hacker (CEH) — EC-Council", url="https://www.eccouncil.org/programs/certified-ethical-hacker-ceh/", resource_type="paid", platform="EC-Council"),
     ]),
+    (["monitoring", "observability", "prometheus", "grafana", "slo", "sla", "alerting"], [
+        ResourceSpec(title="Prometheus Getting Started (official)", url="https://prometheus.io/docs/introduction/overview/", resource_type="free", platform="Prometheus"),
+        ResourceSpec(title="Grafana Fundamentals (free interactive)", url="https://grafana.com/tutorials/grafana-fundamentals/", resource_type="free", platform="Grafana"),
+        ResourceSpec(title="Google SRE Book (free online)", url="https://sre.google/sre-book/table-of-contents/", resource_type="free", platform="Google"),
+        ResourceSpec(title="roadmap.sh DevOps Roadmap — Monitoring section", url="https://roadmap.sh/devops", resource_type="free", platform="roadmap.sh"),
+    ], [
+        ResourceSpec(title="Observability & Monitoring Masterclass — Udemy", url="https://www.udemy.com/course/mastering-prometheus-and-grafana/", resource_type="paid", platform="Udemy"),
+        ResourceSpec(title="Site Reliability Engineering — Coursera", url="https://www.coursera.org/learn/site-reliability-engineering-slos", resource_type="paid", platform="Coursera"),
+    ]),
+    (["distributed systems", "incident response", "chaos engineering", "reliability", "on-call"], [
+        ResourceSpec(title="Google SRE Book (free online)", url="https://sre.google/sre-book/table-of-contents/", resource_type="free", platform="Google"),
+        ResourceSpec(title="Designing Data-Intensive Applications (free preview)", url="https://dataintensive.net/", resource_type="free", platform="O'Reilly"),
+        ResourceSpec(title="roadmap.sh System Design", url="https://roadmap.sh/system-design", resource_type="free", platform="roadmap.sh"),
+    ], [
+        ResourceSpec(title="Distributed Systems — MIT 6.824 (free lectures, paid cert)", url="https://pdos.csail.mit.edu/6.824/", resource_type="paid", platform="MIT"),
+        ResourceSpec(title="Cloud DevOps Engineer Nanodegree — Udacity", url="https://www.udacity.com/course/cloud-dev-ops-nanodegree--nd9991", resource_type="paid", platform="Udacity"),
+    ]),
     (["git", "version control", "github", "gitlab"], [
         ResourceSpec(title="Pro Git Book (free)", url="https://git-scm.com/book/en/v2", resource_type="free", platform="git-scm.com"),
         ResourceSpec(title="GitHub Skills (free interactive courses)", url="https://skills.github.com/", resource_type="free", platform="GitHub"),
@@ -166,8 +183,8 @@ def _get_resources(skill_name: str, category: str) -> list[ResourceSpec]:
 
 
 def _fallback_roadmap_generator(gap_analysis: GapAnalysis, job_title: str) -> GeneratedRoadmap:
-    """Build a flat roadmap from LACK skills when LLM is unavailable."""
-    lack_skills = [sg for sg in gap_analysis.skill_gaps if sg.mastery_level == "LACK"][:12]
+    """Build a flat roadmap from ALL LACK skills when LLM is unavailable."""
+    lack_skills = [sg for sg in gap_analysis.skill_gaps if sg.mastery_level == "LACK"]
     nodes = [
         RoadmapNode(
             skill_name=sg.skill_name,
@@ -223,17 +240,22 @@ SCHEMA_HINT = json.dumps(
 )
 
 
-def _validate_and_repair_roadmap(roadmap: GeneratedRoadmap) -> GeneratedRoadmap:
+def _validate_and_repair_roadmap(
+    roadmap: GeneratedRoadmap,
+    gap_analysis: GapAnalysis,
+    job_title: str,
+) -> GeneratedRoadmap:
     """
     Enforce all roadmap constraints post-LLM:
-    1. LACK-only nodes (discard DONE nodes).
+    1. LACK-only nodes (discard DONE nodes — those are subtracted via the resume).
     2. Deduplicate nodes by skill_name (case-insensitive, first wins).
-    3. Trim to max 12 nodes.
-    4. Ensure each node has at least 2 free + 1 paid resource; inject from templates if missing.
-    5. Nullify dangling parent_skill references.
-    6. Clamp estimated_hours to [1, 200].
+    3. Ensure each node has at least 2 free + 1 paid resource; inject from templates if missing.
+    4. Nullify dangling parent_skill references.
+    5. Clamp estimated_hours to [1, 200].
+    6. Anchor to gap analysis: inject ALL remaining LACK skills the LLM dropped or renamed,
+       so the roadmap is exhaustive — every skill gap from the job that is not on the resume appears.
     """
-    # 1+2. Filter LACK and deduplicate
+    # 1+2. Filter LACK and deduplicate — no hard cap; show all skill gaps
     seen: set[str] = set()
     filtered: list[RoadmapNode] = []
     for node in roadmap.nodes:
@@ -243,10 +265,7 @@ def _validate_and_repair_roadmap(roadmap: GeneratedRoadmap) -> GeneratedRoadmap:
         seen.add(key)
         filtered.append(node)
 
-    # 3. Trim to max 12
-    filtered = filtered[:12]
-
-    # 4. Repair resources per node — ensure ≥2 free + ≥1 paid
+    # 3. Repair resources per node — ensure ≥2 free + ≥1 paid
     repaired: list[RoadmapNode] = []
     for node in filtered:
         free_res = [r for r in node.resources if r.resource_type == "free"]
@@ -269,7 +288,37 @@ def _validate_and_repair_roadmap(roadmap: GeneratedRoadmap) -> GeneratedRoadmap:
         node.estimated_hours = max(1, min(200, node.estimated_hours))
         repaired.append(node)
 
-    # 5. Nullify dangling parent_skill references
+    # 4. Nullify dangling parent_skill references
+    skill_names = {n.skill_name for n in repaired}
+    for node in repaired:
+        if node.parent_skill and node.parent_skill not in skill_names:
+            node.parent_skill = None
+
+    # 6. Anchor: inject ALL LACK skills from the gap analysis the LLM dropped or renamed.
+    # This ensures the roadmap = full job skill list − resume skills (DONE), exhaustively.
+    # Sort: required first, then preferred.
+    repaired_lower = {n.skill_name.lower() for n in repaired}
+    lack_gaps = [
+        sg for sg in gap_analysis.skill_gaps
+        if sg.mastery_level == "LACK"
+        and sg.skill_name.lower() not in repaired_lower
+    ]
+    lack_gaps.sort(key=lambda sg: 0 if sg.importance == "required" else 1)
+
+    for sg in lack_gaps:
+        resources = _get_resources(sg.skill_name, sg.category or "")
+        repaired.append(RoadmapNode(
+            skill_name=sg.skill_name,
+            category=sg.category,
+            mastery_level="LACK",
+            reasoning=sg.reasoning or f"Required for {job_title} role per gap analysis.",
+            description=f"Develop proficiency in {sg.skill_name} as needed for the {job_title} role.",
+            estimated_hours=20,
+            parent_skill=None,
+            resources=resources,
+        ))
+
+    # Rebuild skill_names after injection and re-nullify any new dangling refs
     skill_names = {n.skill_name for n in repaired}
     for node in repaired:
         if node.parent_skill and node.parent_skill not in skill_names:
@@ -279,7 +328,7 @@ def _validate_and_repair_roadmap(roadmap: GeneratedRoadmap) -> GeneratedRoadmap:
 
 
 def run_roadmap_generator(gap_analysis: GapAnalysis, job_title: str) -> GeneratedRoadmap:
-    llm = get_llm()
+    llm = get_llm(max_tokens=6000)
 
     agent = Agent(
         role="Learning Roadmap Architect",
@@ -298,43 +347,46 @@ def run_roadmap_generator(gap_analysis: GapAnalysis, job_title: str) -> Generate
     )
 
     gap_json = gap_analysis.model_dump_json(indent=2)
-    lack_skills = [sg.skill_name for sg in gap_analysis.skill_gaps if sg.mastery_level == "LACK"]
+    lack_gaps = [sg for sg in gap_analysis.skill_gaps if sg.mastery_level == "LACK"]
+    lack_skills_str = "\n".join(f"  - {sg.skill_name} ({sg.category}, {sg.importance})" for sg in lack_gaps)
 
     task = Task(
         description=f"""
-You are given a skill gap analysis for a candidate targeting a {job_title} role.
+You are designing a comprehensive, dependency-aware learning roadmap for a candidate
+targeting a **{job_title}** role.
 
-Gap Analysis:
+The candidate's gap analysis identified these {len(lack_gaps)} skills as MISSING (LACK) —
+these are the job requirements NOT already covered by the candidate's resume:
+{lack_skills_str}
+
+Full gap analysis JSON (for reasoning context):
 {gap_json}
 
-Create a learning roadmap. Include ONLY the LACK skills (skills the candidate is missing).
-The candidate lacks these skills: {lack_skills}
-Limit to the 12 most important LACK skills. For each node:
+YOUR JOB: Convert EVERY LACK skill above into an ordered, dependency-aware learning roadmap.
+The roadmap = (full {job_title} skill list) − (skills already on the resume).
+Include ALL skills from the LACK list — do not drop any.
 
-1. mastery_level: always "LACK"
-2. parent_skill: prerequisite skill name (must match another node's skill_name exactly), or null
-3. resources: provide a COMPREHENSIVE list with AT LEAST 2-3 free AND 2 paid resources per node.
-   - Free resources: official docs, freeCodeCamp, roadmap.sh, YouTube channels, interactive platforms (Kaggle, Exercism, etc.)
-   - Paid resources: Udemy, Coursera, Pluralsight, Frontend Masters, A Cloud Guru
-   - Include real, working URLs for all resources
-4. estimated_hours: integer, realistic hours to reach proficiency (between 1 and 200)
-5. description: one sentence describing what the skill covers
-
-IMPORTANT:
-- Output at most 12 nodes total
-- parent_skill must exactly match a skill_name in your list, or be null
-- mastery_level must be "LACK" only — never "DONE"
-- Every node must have at least 2 free resources AND at least 2 paid resources
-- Provide real, specific resource titles and URLs — not generic placeholders
+STRICT RULES — violation will cause the output to be rejected:
+1. skill_name MUST be taken verbatim from the LACK skill list above — do NOT rename, merge,
+   or invent new skills. Every node's skill_name must exactly match one of the names above.
+2. mastery_level: always "LACK" — never "DONE"
+3. Include ALL {len(lack_gaps)} LACK skills — output all of them, ordered by importance/dependency.
+4. parent_skill: prerequisite skill_name (must exactly match another node's skill_name), or null.
+5. resources: AT LEAST 2 free AND 2 paid resources per node with real, working URLs.
+   - Free: official docs, freeCodeCamp, roadmap.sh, YouTube, Kaggle, interactive platforms
+   - Paid: Udemy, Coursera, Pluralsight, Frontend Masters, A Cloud Guru, Linux Foundation
+6. estimated_hours: integer 1–200
+7. description: one sentence specific to what the skill covers in a {job_title} context.
 
 Return ONLY a single valid JSON object — no markdown fences, no explanation.
 Use this exact shape:
 {SCHEMA_HINT}
 """,
         expected_output=(
-            "A JSON object with a 'nodes' array. Each node has: skill_name, category, "
-            "mastery_level (LACK only), reasoning, description, estimated_hours (int 1-200), "
-            "parent_skill (str|null), resources (list with at least 2 free and 2 paid entries)."
+            "A JSON object with a 'nodes' array containing ALL LACK skills. Each node has: "
+            "skill_name, category, mastery_level (LACK only), reasoning, description, "
+            "estimated_hours (int 1-200), parent_skill (str|null), resources (list with "
+            "at least 2 free and 2 paid entries)."
         ),
         agent=agent,
     )
@@ -343,7 +395,7 @@ Use this exact shape:
 
     def _parse_and_validate(raw: str) -> GeneratedRoadmap:
         roadmap = GeneratedRoadmap.model_validate_json(extract_json(raw))
-        roadmap = _validate_and_repair_roadmap(roadmap)
+        roadmap = _validate_and_repair_roadmap(roadmap, gap_analysis, job_title)
         if not roadmap.nodes:
             raise ValueError("Roadmap has no valid LACK nodes after validation")
         return roadmap

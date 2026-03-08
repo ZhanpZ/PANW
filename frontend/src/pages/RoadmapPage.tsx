@@ -20,7 +20,6 @@ function LoadingOverlay({ jobTitle }: { jobTitle?: string }) {
   useEffect(() => {
     const tick = setInterval(() => {
       elapsed.current += 1;
-      // Advance message roughly every 15s
       const next = Math.min(Math.floor(elapsed.current / 15), STATUS_MESSAGES.length - 1);
       setMsgIdx(next);
     }, 1000);
@@ -29,11 +28,16 @@ function LoadingOverlay({ jobTitle }: { jobTitle?: string }) {
 
   return (
     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center
-      bg-white/80 backdrop-blur-sm">
-      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-      <p className="text-gray-700 font-medium text-sm">{STATUS_MESSAGES[msgIdx]}</p>
+      bg-white/90 backdrop-blur-sm">
+      {/* Spinner ring */}
+      <div className="relative w-12 h-12 mb-5">
+        <div className="absolute inset-0 rounded-full border-2 border-zinc-200" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent
+          border-t-orange-500 animate-spin" />
+      </div>
+      <p className="text-[14px] font-medium text-zinc-800">{STATUS_MESSAGES[msgIdx]}</p>
       {jobTitle && (
-        <p className="text-gray-400 text-xs mt-1">Target role: {jobTitle}</p>
+        <p className="text-[12px] text-zinc-400 mt-1">Target role: {jobTitle}</p>
       )}
     </div>
   );
@@ -44,56 +48,65 @@ export function RoadmapPage() {
   const { activeSessionId } = useSessionStore();
   const navigate = useNavigate();
 
-  // If no session and no roadmap in progress, redirect home
   useEffect(() => {
     if (!activeSessionId && !isPolling && !roadmap) {
       navigate("/");
     }
   }, [activeSessionId, isPolling, roadmap, navigate]);
 
-  const jobTitle = roadmap?.skill_nodes[0]
-    ? undefined
-    : undefined; // We don't store job title in roadmap store; shown generically
-
   return (
     <div className="flex-1 relative overflow-hidden">
-      {/* Polling overlay */}
-      {isPolling && <LoadingOverlay jobTitle={jobTitle} />}
+      {isPolling && <LoadingOverlay jobTitle={roadmap?.job_title ?? undefined} />}
 
       {/* Error state */}
       {jobError && !isPolling && !roadmap && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90">
-          <p className="text-red-600 font-medium mb-2">Roadmap generation failed.</p>
-          <p className="text-sm text-gray-500 mb-4 max-w-sm text-center">{jobError}</p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => { clearRoadmap(); navigate("/"); }}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500"
-            >
-              Try Again
-            </button>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white">
+          <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mb-4">
+            <svg className="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
           </div>
+          <p className="text-[15px] font-semibold text-zinc-900 mb-1">Generation failed</p>
+          <p className="text-[13px] text-zinc-500 mb-6 max-w-sm text-center">{jobError}</p>
+          <button
+            onClick={() => { clearRoadmap(); navigate("/"); }}
+            className="px-5 py-2 bg-orange-500 text-white text-[13px] font-medium rounded-xl
+              hover:bg-orange-600 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       )}
 
       {/* Empty state */}
       {!isPolling && !roadmap && !jobError && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-          No roadmap yet.{" "}
-          <button className="ml-1 text-blue-500 hover:underline" onClick={() => navigate("/")}>
-            Generate one
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          <p className="text-[13px] text-zinc-400">No roadmap yet.</p>
+          <button
+            className="text-[13px] text-orange-500 hover:text-orange-700 font-medium transition-colors"
+            onClick={() => navigate("/")}
+          >
+            Generate one →
           </button>
         </div>
       )}
 
-      {/* Canvas */}
       {roadmap && (
-        <div className="w-full h-full">
+        <div className="w-full h-full relative">
+          {roadmap.job_title && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+                bg-white/90 border border-zinc-200 shadow-sm text-[12px] font-medium text-zinc-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                {roadmap.job_title}
+              </span>
+            </div>
+          )}
           <RoadmapCanvas />
         </div>
       )}
 
-      {/* Node detail panel */}
       <NodeDetailPanel />
     </div>
   );

@@ -31,6 +31,7 @@ export interface Roadmap {
   status: JobStatus;
   error_message: string | null;
   created_at: string;
+  job_title: string | null;
   skill_nodes: SkillNode[];
 }
 

@@ -34,6 +34,7 @@ export const roadmapApi = {
       `/api/v1/roadmap/job/${jobId}`
     ),
   get: (roadmapId: number) => api.get<Roadmap>(`/api/v1/roadmap/${roadmapId}`),
+  getBySession: (sessionId: number) => api.get<Roadmap>(`/api/v1/roadmap/session/${sessionId}`),
   updateNodeMastery: (nodeId: number, mastery_level: MasteryLevel) =>
     api.patch(`/api/v1/roadmap/node/${nodeId}`, { mastery_level }),
 };

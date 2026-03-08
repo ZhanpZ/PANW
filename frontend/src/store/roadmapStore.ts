@@ -10,11 +10,13 @@ interface RoadmapStore {
   jobStatus: JobStatus | null;
   jobError: string | null;
   isPolling: boolean;
+  sessionJobTitles: Record<number, string>;
 
   setJobId: (id: number) => void;
   startPolling: (jobId: number) => void;
   stopPolling: () => void;
   loadRoadmap: (roadmapId: number) => Promise<void>;
+  setRoadmap: (roadmap: Roadmap) => void;
   updateNodeMastery: (nodeId: number, level: MasteryLevel) => Promise<void>;
   clearRoadmap: () => void;
 }
@@ -27,6 +29,7 @@ export const useRoadmapStore = create<RoadmapStore>((set, get) => ({
   jobStatus: null,
   jobError: null,
   isPolling: false,
+  sessionJobTitles: {},
 
   setJobId: (id) => set({ jobId: id }),
 
@@ -64,8 +67,21 @@ export const useRoadmapStore = create<RoadmapStore>((set, get) => ({
 
   loadRoadmap: async (roadmapId: number) => {
     const res = await roadmapApi.get(roadmapId);
-    set({ roadmap: res.data });
+    const roadmap = res.data;
+    set((state) => ({
+      roadmap,
+      sessionJobTitles: roadmap.job_title
+        ? { ...state.sessionJobTitles, [roadmap.session_id]: roadmap.job_title }
+        : state.sessionJobTitles,
+    }));
   },
+
+  setRoadmap: (roadmap: Roadmap) => set((state) => ({
+    roadmap,
+    sessionJobTitles: roadmap.job_title
+      ? { ...state.sessionJobTitles, [roadmap.session_id]: roadmap.job_title }
+      : state.sessionJobTitles,
+  })),
 
   updateNodeMastery: async (nodeId: number, level: MasteryLevel) => {
     await roadmapApi.updateNodeMastery(nodeId, level);

@@ -24,103 +24,114 @@ export function NodeDetailPanel() {
   if (!node) return null;
 
   const mastery = node.mastery_level as MasteryLevel;
-  const colors = MASTERY_COLORS[mastery];
+  const isDone = mastery === "DONE";
 
   return (
     <>
-      {/* Backdrop */}
       {isPanelOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/10"
+          className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]"
           onClick={() => setIsPanelOpen(false)}
         />
       )}
 
-      {/* Panel */}
       <div
-        className={`fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50
-          transition-transform duration-300 flex flex-col
+        className={`fixed right-0 top-0 h-full w-[380px] bg-white border-l border-zinc-100
+          shadow-2xl shadow-black/10 z-50 transition-transform duration-300 ease-out flex flex-col
           ${isPanelOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Header */}
-        <div
-          className="flex items-start justify-between p-5 border-b"
-          style={{ backgroundColor: colors.bg }}
-        >
-          <div className="flex-1 min-w-0">
-            <span
-              className="inline-block text-xs font-bold px-2 py-0.5 rounded-full text-white mb-1"
-              style={{ backgroundColor: colors.border }}
-            >
-              {mastery}
-            </span>
-            <h2 className="text-base font-bold text-gray-900 leading-tight">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-zinc-100">
+          <div className="flex-1 min-w-0 pr-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold
+                  tracking-wide
+                  ${isDone
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-rose-50 text-rose-600"
+                  }`}
+              >
+                {mastery}
+              </span>
+              {node.category && (
+                <span className="text-[11px] text-zinc-400">{node.category}</span>
+              )}
+            </div>
+            <h2 className="text-[15px] font-semibold text-zinc-900 leading-snug">
               {node.skill_name}
             </h2>
-            {node.category && (
-              <p className="text-xs text-gray-500 mt-0.5">{node.category}</p>
-            )}
           </div>
           <button
             onClick={() => setIsPanelOpen(false)}
-            className="ml-3 text-gray-400 hover:text-gray-700 text-xl leading-none flex-shrink-0"
+            className="flex-shrink-0 p-1 text-zinc-400 hover:text-zinc-700 rounded-lg
+              hover:bg-zinc-100 transition-colors"
           >
-            ×
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* Description */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          {/* Overview */}
           {node.description && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
                 Overview
               </p>
-              <p className="text-sm text-gray-700 leading-relaxed">{node.description}</p>
+              <p className="text-[13px] text-zinc-600 leading-relaxed">{node.description}</p>
             </div>
           )}
 
-          {/* Reasoning */}
+          {/* Gap Analysis */}
           {node.reasoning && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
                 Gap Analysis
               </p>
-              <p className="text-sm text-gray-600 italic leading-relaxed">{node.reasoning}</p>
+              <p className="text-[13px] text-zinc-500 italic leading-relaxed">{node.reasoning}</p>
             </div>
           )}
 
           {/* Estimated hours */}
           {node.estimated_hours != null && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="text-gray-400">⏱</span>
-              <span>~{node.estimated_hours} hours to proficiency</span>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-[13px] text-zinc-500">
+                ~{node.estimated_hours} hours to proficiency
+              </span>
             </div>
           )}
 
-          {/* Mark as Done — only shown for LACK nodes */}
-          {mastery === "LACK" && (
+          {/* Mastery toggle */}
+          {!isDone ? (
             <button
               onClick={handleMarkDone}
-              className="w-full py-2 rounded-lg text-sm font-medium transition-colors border-2
-                border-green-400 text-green-700 hover:bg-green-50"
+              className="w-full py-2.5 rounded-xl text-[13px] font-medium transition-all
+                border border-emerald-300 text-emerald-700 hover:bg-emerald-50
+                hover:border-emerald-400"
             >
               Mark as DONE
             </button>
-          )}
-
-          {/* Completion badge for DONE nodes */}
-          {mastery === "DONE" && (
-            <div className="w-full py-2 rounded-lg text-sm font-medium text-center
-              border-2 border-green-400 bg-green-50 text-green-700">
+          ) : (
+            <div className="w-full py-2.5 rounded-xl text-[13px] font-medium text-center
+              border border-emerald-300 bg-emerald-50 text-emerald-700 flex items-center
+              justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
               Completed
             </div>
           )}
 
           {/* Resources */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-3">
               Learning Resources
             </p>
             <ResourceList resources={node.resources} />

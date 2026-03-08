@@ -13,13 +13,13 @@ from crewai import LLM
 from app.core.config import settings
 
 
-def get_llm() -> LLM:
+def get_llm(max_tokens: int = 4096) -> LLM:
     if settings.LLM_PROVIDER == "ollama":
         return LLM(
             model=f"ollama/{settings.OLLAMA_MODEL}",
             base_url=settings.OLLAMA_BASE_URL,
             temperature=0.1,
-            max_tokens=4096,
+            max_tokens=min(max_tokens, 8192),
         )
 
     # Default: OpenAI
@@ -32,5 +32,5 @@ def get_llm() -> LLM:
         model="gpt-4o-mini",
         api_key=settings.OPENAI_API_KEY,
         temperature=0.1,
-        max_tokens=4096,
+        max_tokens=max_tokens,
     )

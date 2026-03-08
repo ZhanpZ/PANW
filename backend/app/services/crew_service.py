@@ -3,6 +3,7 @@ Crew service — JSON utility, 4-agent pipeline orchestration,
 background task, and DB persistence.
 """
 
+import concurrent.futures
 import json
 import re
 
@@ -50,16 +51,48 @@ def run_pipeline(request: GenerateRoadmapRequest) -> GeneratedRoadmap:
     from app.agents.gap_analyzer import run_gap_analyzer
     from app.agents.roadmap_generator import run_roadmap_generator
 
-    profile  = run_resume_parser(request.resume_text, request.github_summaries)
-    job_reqs = run_job_requirements(request.job_title)
-    gap      = run_gap_analyzer(profile, job_reqs)
-    roadmap  = run_roadmap_generator(gap, request.job_title)
+    # Agent 1 (resume) and Agent 2 (job requirements) are independent — run in parallel
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        future_profile  = executor.submit(run_resume_parser, request.resume_text, request.github_summaries)
+        future_job_reqs = executor.submit(run_job_requirements, request.job_title)
+        profile  = future_profile.result()
+        job_reqs = future_job_reqs.result()
+
+    gap     = run_gap_analyzer(profile, job_reqs)
+    roadmap = run_roadmap_generator(gap, request.job_title)
     return roadmap
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # DB persistence
 # ──────────────────────────────────────────────────────────────────────────────
+
+def _compute_category_grid(nodes: list[RoadmapNode]) -> dict[str, tuple[float, float]]:
+    """Category-column grid layout: each category is a column, nodes stack vertically."""
+    from collections import defaultdict
+
+    NODE_W = 220
+    NODE_H = 80
+    H_GAP = 80
+    V_GAP = 40
+
+    by_category: dict[str, list[str]] = defaultdict(list)
+    for node in nodes:
+        by_category[node.category or "General"].append(node.skill_name)
+
+    positions: dict[str, tuple[float, float]] = {}
+    num_cols = len(by_category)
+    total_width = num_cols * NODE_W + (num_cols - 1) * H_GAP
+    start_x = -total_width / 2
+
+    for col_idx, (category, names) in enumerate(sorted(by_category.items())):
+        x = start_x + col_idx * (NODE_W + H_GAP)
+        for row_idx, name in enumerate(names):
+            y = row_idx * (NODE_H + V_GAP)
+            positions[name] = (x, y)
+
+    return positions
+
 
 def _compute_positions(nodes: list[RoadmapNode]) -> dict[str, tuple[float, float]]:
     """Topological BFS layout: levels on Y-axis, siblings spread on X-axis."""
@@ -104,6 +137,11 @@ def _compute_positions(nodes: list[RoadmapNode]) -> dict[str, tuple[float, float
         by_level[lvl].append(name)
     for lvl in by_level:
         by_level[lvl].sort()
+
+    # Fall back to category grid when >50% of nodes land at the same level (flat layout)
+    level0_count = len(by_level.get(0, []))
+    if nodes and level0_count > len(nodes) * 0.5:
+        return _compute_category_grid(nodes)
 
     positions: dict[str, tuple[float, float]] = {}
     for lvl, names in sorted(by_level.items()):

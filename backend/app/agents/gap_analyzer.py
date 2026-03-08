@@ -108,7 +108,7 @@ def _validate_and_repair_gap(gap: GapAnalysis, job_reqs: JobRequirements) -> Gap
 
 
 def run_gap_analyzer(profile: ParsedProfile, job_reqs: JobRequirements) -> GapAnalysis:
-    llm = get_llm()
+    llm = get_llm(max_tokens=3000)
 
     agent = Agent(
         role="Career Gap Analyst",
@@ -181,11 +181,23 @@ Use this exact shape:
     )
 
     crew = Crew(agents=[agent], tasks=[task], verbose=False)
+
+    def _parse_result(raw: str) -> GapAnalysis:
+        extracted = extract_json(raw)
+        print(f"[DEBUG] gap_analyzer: extracted JSON (first 500 chars): {extracted[:500]}")
+        gap = GapAnalysis.model_validate_json(extracted)
+        return _validate_and_repair_gap(gap, job_reqs)
+
     try:
         result = crew.kickoff()
         raw = result.raw if hasattr(result, "raw") else str(result)
-        gap = GapAnalysis.model_validate_json(extract_json(raw))
-        return _validate_and_repair_gap(gap, job_reqs)
+        try:
+            return _parse_result(raw)
+        except Exception as first_exc:
+            print(f"[RETRY] gap_analyzer: first attempt failed ({first_exc!r}), retrying once")
+            result = crew.kickoff()
+            raw = result.raw if hasattr(result, "raw") else str(result)
+            return _parse_result(raw)
     except Exception as exc:
-        print(f"[FALLBACK] gap_analyzer: AI failed ({exc!r}), using keyword-match fallback")
+        print(f"[FALLBACK] gap_analyzer: AI failed after retry ({exc!r}), using keyword-match fallback")
         return _fallback_gap_analyzer(profile, job_reqs)

@@ -89,6 +89,10 @@ class Roadmap(Base):
     profile = relationship("Profile", back_populates="roadmaps")
     skill_nodes = relationship("SkillNode", back_populates="roadmap", cascade="all, delete-orphan")
 
+    @property
+    def job_title(self) -> str | None:
+        return self.profile.job_title if self.profile else None
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # SkillNode (self-referential DAG via parent_id)

@@ -340,6 +340,68 @@ Tech: Python, scikit-learn, matplotlib, seaborn
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Profile 5 — New Grad (CS) → Software Engineer
+# ──────────────────────────────────────────────────────────────────────────────
+
+def profile_new_grad_to_swe() -> dict:
+    name = fake_name()
+    univ = fake_univ()
+    resume = f"""\
+{name}
+Email: {name.lower().replace(' ', '.')}@email.com | GitHub: github.com/{name.lower().replace(' ', '')}
+
+EDUCATION
+B.S. Computer Science — {univ}, May 2026 (Expected)
+GPA: 3.4/4.0 | Relevant coursework: Data Structures, Algorithms, Computer Organization,
+Software Engineering, Database Systems, Discrete Math
+
+EXPERIENCE
+No full-time industry experience.
+
+Class Project — E-Commerce Web App (Jan 2026 – Apr 2026)
+• Team of 4; built a shopping cart app using React and a Node.js/Express backend
+• Integrated a SQLite database for product and order storage
+• Deployed on a free-tier Render instance for demo day
+
+Hackathon — HackState 2025 (48 hours)
+• Built a real-time chat app with WebSockets (Socket.io) and a Vue.js frontend
+• Won "Best First-Time Hacker" award among 120 participants
+
+SKILLS
+Languages: Python, Java, C (intro-level), JavaScript, HTML, CSS
+Frameworks: React (basic), Express.js (basic)
+Tools: Git, VS Code, Linux terminal (basic), IntelliJ IDEA
+Concepts: OOP, basic sorting/searching algorithms, relational schemas, REST APIs (consumer)
+
+PROJECTS
+Personal Portfolio: Static site built with HTML/CSS/JavaScript hosted on GitHub Pages.
+
+Sorting Visualizer: React app animating bubble, merge, and quicksort algorithms
+with adjustable speed control.
+"""
+
+    github = """\
+Repository: sorting-visualizer
+Description: Visual demo of sorting algorithms in React
+Tech: React, JavaScript, CSS
+• Animates bubble sort, merge sort, and quicksort step-by-step
+• Adjustable speed slider and array size controls
+• Deployed via GitHub Pages
+
+Repository: ecommerce-project
+Description: Full-stack e-commerce class project
+Tech: React, Node.js, Express, SQLite
+• Product listing, cart, and checkout flow
+• Simple admin panel to add/remove products
+• Deployed on Render (free tier)
+"""
+    return (
+        {"resume_text": resume.strip(), "job_title": "Software Engineer"},
+        {"github_summaries": github.strip()},
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Main
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -349,12 +411,13 @@ PROFILES = [
     profile_frontend_to_fullstack,
     profile_bootcamp_to_backend,
     profile_biology_to_ml,
+    profile_new_grad_to_swe,
 ]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate synthetic fixture data")
-    parser.add_argument("--count", type=int, default=5, help="Number of fixtures (max 5)")
+    parser.add_argument("--count", type=int, default=6, help="Number of fixtures (max 6)")
     parser.add_argument("--output", type=str, default="fixtures/", help="Output directory")
     args = parser.parse_args()
 

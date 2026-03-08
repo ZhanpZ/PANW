@@ -22,8 +22,6 @@ const JOB_TITLES = [
   "ML Engineer",
   "DevOps Engineer",
   "Site Reliability Engineer",
-  "Mobile Engineer",
-  "Security Engineer",
 ];
 
 type InputMode = "paste" | "file";
@@ -35,7 +33,6 @@ async function extractTextFromFile(file: File): Promise<string> {
     const text = await file.text();
     try {
       const parsed = JSON.parse(text);
-      // If it's an object/array, pretty-print it so the LLM can read it
       return typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2);
     } catch {
       return text;
@@ -108,40 +105,42 @@ function FileInputField({
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <label className="block text-sm font-medium text-gray-700">
-          {label} {required && <span className="text-red-500">*</span>}
-          {!required && <span className="text-gray-400 font-normal"> (optional)</span>}
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-[13px] font-medium text-zinc-700">
+          {label}
+          {required
+            ? <span className="ml-1 text-rose-500">*</span>
+            : <span className="ml-1 text-zinc-400 font-normal text-[12px]">optional</span>
+          }
         </label>
-        {/* Toggle */}
-        <div className="flex rounded-md border border-gray-300 overflow-hidden text-xs">
+        {/* Mode toggle */}
+        <div className="flex rounded-lg border border-zinc-200 overflow-hidden text-[11px] font-medium">
           <button
             type="button"
             onClick={() => onModeChange("paste")}
             className={`px-3 py-1 transition-colors ${
               mode === "paste"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-950 text-white"
+                : "bg-white text-zinc-500 hover:text-zinc-800"
             }`}
           >
-            Paste Text
+            Paste
           </button>
           <button
             type="button"
             onClick={() => { onModeChange("file"); fileRef.current?.click(); }}
-            className={`px-3 py-1 border-l border-gray-300 transition-colors ${
+            className={`px-3 py-1 border-l border-zinc-200 transition-colors ${
               mode === "file"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-950 text-white"
+                : "bg-white text-zinc-500 hover:text-zinc-800"
             }`}
           >
-            Upload File
+            Upload
           </button>
         </div>
       </div>
 
-      {/* Hidden file input */}
       <input
         ref={fileRef}
         type="file"
@@ -153,30 +152,32 @@ function FileInputField({
       {mode === "file" ? (
         <div
           onClick={() => fileRef.current?.click()}
-          className="w-full border-2 border-dashed border-gray-300 rounded-lg px-4 py-8
+          className="w-full border border-dashed border-zinc-300 rounded-xl px-4 py-8
             flex flex-col items-center justify-center gap-2 cursor-pointer
-            hover:border-blue-400 hover:bg-blue-50 transition-colors"
+            hover:border-orange-500 hover:bg-orange-50/40 transition-all duration-200"
         >
           {parsing ? (
-            <p className="text-sm text-blue-600 animate-pulse">Parsing file…</p>
+            <p className="text-[13px] text-orange-500 animate-pulse">Parsing file…</p>
           ) : fileName ? (
             <>
-              <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <p className="text-sm font-medium text-gray-700">{fileName}</p>
-              <p className="text-xs text-gray-400">Click to replace</p>
+              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-[13px] font-medium text-zinc-700">{fileName}</p>
+              <p className="text-[11px] text-zinc-400">Click to replace</p>
             </>
           ) : (
             <>
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <p className="text-sm text-gray-600">
-                {fileLabel ?? "Click to upload"}
-              </p>
-              <p className="text-xs text-gray-400">.json, .pdf, .doc, .docx</p>
+              <div className="w-9 h-9 rounded-full bg-zinc-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+              </div>
+              <p className="text-[13px] text-zinc-600">{fileLabel ?? "Click to upload"}</p>
+              <p className="text-[11px] text-zinc-400">.pdf, .doc, .docx, .json</p>
             </>
           )}
         </div>
@@ -186,18 +187,19 @@ function FileInputField({
           onChange={(e) => onTextChange(e.target.value)}
           rows={textRows}
           placeholder={textPlaceholder}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-            focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y font-mono"
+          className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-[13px] text-zinc-800
+            focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500
+            resize-y font-mono leading-relaxed placeholder-zinc-400 transition-all"
         />
       )}
 
-      {/* Show extracted preview when file mode has content */}
       {mode === "file" && text && !parsing && (
-        <details className="mt-2">
-          <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+        <details className="mt-1">
+          <summary className="text-[11px] text-zinc-400 cursor-pointer hover:text-zinc-600 transition-colors">
             Preview extracted text ({text.length} chars)
           </summary>
-          <pre className="mt-1 text-xs text-gray-600 bg-gray-100 rounded p-2 max-h-32 overflow-y-auto whitespace-pre-wrap">
+          <pre className="mt-1 text-[11px] text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg
+            p-3 max-h-28 overflow-y-auto whitespace-pre-wrap">
             {text.slice(0, 800)}{text.length > 800 ? "\n…" : ""}
           </pre>
         </details>
@@ -217,10 +219,7 @@ export function HomePage() {
   const [githubSummaries, setGithubSummaries] = useState("");
   const [githubMode, setGithubMode] = useState<InputMode>("paste");
   const [jobTitle, setJobTitle] = useState("Cloud Engineer");
-  const [customJobTitle, setCustomJobTitle] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const effectiveJobTitle = jobTitle === "__custom__" ? customJobTitle.trim() : jobTitle;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,8 +227,8 @@ export function HomePage() {
       addToast("Please provide your resume (paste or upload a file).", "error");
       return;
     }
-    if (!effectiveJobTitle) {
-      addToast("Please enter a job title.", "error");
+    if (!jobTitle) {
+      addToast("Please select a job title.", "error");
       return;
     }
 
@@ -246,7 +245,7 @@ export function HomePage() {
         session_id: sessionId,
         resume_text: resumeText,
         github_summaries: githubSummaries,
-        job_title: effectiveJobTitle,
+        job_title: jobTitle,
       });
 
       startPolling(res.data.job_id);
@@ -262,83 +261,79 @@ export function HomePage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-gray-50">
-      <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">
-          Skill-Bridge Career Navigator
-        </h1>
-        <p className="text-gray-500 text-sm mb-8">
-          Paste or upload your resume and GitHub summaries, choose a target role, and get a
-          personalized skill-gap roadmap.
+    <div className="flex-1 overflow-y-auto bg-white">
+      {/* Hero */}
+      <div className="border-b border-zinc-100 px-8 py-10">
+        <p className="text-[11px] font-semibold text-orange-500 uppercase tracking-widest mb-2">
+          Career Navigator
         </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 mb-2">
+          Build your skill roadmap
+        </h1>
+        <p className="text-[13px] text-zinc-500 max-w-md leading-relaxed">
+          Upload your resume and GitHub summaries, pick a target role, and get a personalized
+          skill-gap roadmap — instantly.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Resume */}
-          <FileInputField
-            label="Resume"
-            required
-            mode={resumeMode}
-            onModeChange={setResumeMode}
-            text={resumeText}
-            onTextChange={setResumeText}
-            textPlaceholder="Describe your resume: education, work experience, projects"
-            textRows={10}
-            fileLabel="Click to upload your resume"
-            onFileError={(msg) => addToast(msg, "error")}
-          />
+      {/* Form */}
+      <div className="px-8 py-8">
+        <div className="max-w-xl w-full">
+          <form onSubmit={handleSubmit} className="space-y-7">
+            <FileInputField
+              label="Resume"
+              required
+              mode={resumeMode}
+              onModeChange={setResumeMode}
+              text={resumeText}
+              onTextChange={setResumeText}
+              textPlaceholder="Describe your education, work experience, and projects…"
+              textRows={9}
+              fileLabel="Click to upload your resume"
+              onFileError={(msg) => addToast(msg, "error")}
+            />
 
-          {/* GitHub summaries */}
-          <FileInputField
-            label="GitHub Project Summaries"
-            mode={githubMode}
-            onModeChange={setGithubMode}
-            text={githubSummaries}
-            onTextChange={setGithubSummaries}
-            textPlaceholder="Describe your GitHub repos: tech stack, what the project does, your role…"
-            textRows={5}
-            fileLabel="Click to upload GitHub summaries"
-            onFileError={(msg) => addToast(msg, "error")}
-          />
+            <FileInputField
+              label="GitHub Project Summaries"
+              mode={githubMode}
+              onModeChange={setGithubMode}
+              text={githubSummaries}
+              onTextChange={setGithubSummaries}
+              textPlaceholder="Describe your repos: tech stack, what the project does, your role…"
+              textRows={4}
+              fileLabel="Click to upload GitHub summaries"
+              onFileError={(msg) => addToast(msg, "error")}
+            />
 
-          {/* Job title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Target Job Title <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            {/* Job title */}
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium text-zinc-700">
+                Target Job Title <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-[13px] text-zinc-800
+                  focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500
+                  bg-white appearance-none transition-all"
+              >
+                {JOB_TITLES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-40
+                text-white font-medium rounded-xl px-4 py-3 transition-colors text-[13px]
+                tracking-wide"
             >
-              {JOB_TITLES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-              <option value="__custom__">Other (type below)…</option>
-            </select>
-            {jobTitle === "__custom__" && (
-              <input
-                type="text"
-                value={customJobTitle}
-                onChange={(e) => setCustomJobTitle(e.target.value)}
-                placeholder="e.g. Embedded Systems Engineer"
-                className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50
-              text-white font-semibold rounded-lg px-4 py-3 transition-colors text-sm"
-          >
-            {submitting ? "Starting…" : "Generate My Roadmap"}
-          </button>
-        </form>
+              {submitting ? "Starting…" : "Generate Roadmap"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

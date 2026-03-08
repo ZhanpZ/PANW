@@ -81,7 +81,7 @@ def _validate_and_repair_profile(profile: ParsedProfile) -> ParsedProfile:
 
 
 def run_resume_parser(resume_text: str, github_summaries: str) -> ParsedProfile:
-    llm = get_llm()
+    llm = get_llm(max_tokens=2000)
 
     agent = Agent(
         role="Technical Resume Parser",

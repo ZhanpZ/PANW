@@ -60,6 +60,19 @@ def poll_job(job_id: int, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/roadmap/session/{session_id}", response_model=RoadmapOut)
+def get_roadmap_by_session(session_id: int, db: Session = Depends(get_db)):
+    roadmap = (
+        db.query(Roadmap)
+        .filter(Roadmap.session_id == session_id, Roadmap.status == RoadmapStatus.complete)
+        .order_by(Roadmap.created_at.desc())
+        .first()
+    )
+    if not roadmap:
+        raise HTTPException(status_code=404, detail="No completed roadmap for this session")
+    return roadmap
+
+
 @router.get("/roadmap/{roadmap_id}", response_model=RoadmapOut)
 def get_roadmap(roadmap_id: int, db: Session = Depends(get_db)):
     roadmap = db.query(Roadmap).filter(Roadmap.id == roadmap_id).first()

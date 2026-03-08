@@ -76,6 +76,7 @@ class RoadmapOut(BaseModel):
     status: str
     error_message: str | None
     created_at: datetime
+    job_title: str | None
     skill_nodes: list[SkillNodeOut]
 
     model_config = ConfigDict(from_attributes=True)
