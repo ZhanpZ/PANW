@@ -47,9 +47,6 @@ curl http://localhost:8000/api/v1/health
 cd backend
 python scripts/generate_synthetic_data.py --count 5 --output fixtures/
 
-# Smoke-test the LLM connection
-python scripts/test_llm.py
-
 # Full agent pipeline test
 python scripts/test_crew_full.py
 ```
